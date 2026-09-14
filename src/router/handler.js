@@ -9,6 +9,8 @@ import {
 	handleAddSecret,
 	handleUpdateSecret,
 	handleDeleteSecret,
+	handleAdvanceHOTPCounter,
+	handleCompactHOTPCounters,
 	handleGenerateOTP,
 	handleBatchAddSecrets,
 	handleBackupSecrets,
@@ -44,6 +46,7 @@ import {
 } from '../api/gdrive.js';
 import { handleChangePassword } from '../api/password.js';
 import { handleGetSettings, handleSaveSettings } from '../api/settings.js';
+import { handleGetTime } from '../api/time.js';
 
 // UI 页面生成器
 import { createMainPage } from '../ui/page.js';
@@ -81,6 +84,16 @@ export async function handleRequest(request, env, ctx) {
 	const logger = getLogger(env);
 
 	try {
+		// 时间校准接口必须在设置和认证检查前处理，确保无需访问 KV。
+		if (pathname === '/api/time') {
+			if (method === 'GET') {
+				return handleGetTime(request);
+			}
+			const response = createErrorResponse('方法不允许', `不支持的HTTP方法: ${method}`, 405, request);
+			response.headers.set('Allow', 'GET');
+			return response;
+		}
+
 		// 🔧 首次设置路由（不需要认证）
 		if (pathname === '/setup') {
 			// 检查是否需要首次设置
@@ -286,6 +299,22 @@ async function handleApiRequest(pathname, method, request, env, ctx) {
 	if (pathname === '/api/secrets/export') {
 		if (method === 'POST') {
 			return handleExportSecrets(request, env);
+		}
+		return createErrorResponse('方法不允许', `不支持的HTTP方法: ${method}`, 405, request);
+	}
+
+	// 回滚旧版本前显式压实HOTP sidecar（受统一API认证保护）
+	if (pathname === '/api/secrets/counters/compact') {
+		if (method === 'POST') {
+			return handleCompactHOTPCounters(request, env, ctx);
+		}
+		return createErrorResponse('方法不允许', `不支持的HTTP方法: ${method}`, 405, request);
+	}
+
+	// HOTP 计数器递增API（必须在 /api/secrets/{id} 之前匹配）
+	if (/^\/api\/secrets\/[^/]+\/counter$/.test(pathname)) {
+		if (method === 'POST') {
+			return handleAdvanceHOTPCounter(request, env, ctx);
 		}
 		return createErrorResponse('方法不允许', `不支持的HTTP方法: ${method}`, 405, request);
 	}

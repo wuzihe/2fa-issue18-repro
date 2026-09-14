@@ -2,7 +2,92 @@
  * 组件样式模块
  */
 export function getComponentStyles() {
-	return `    .secrets-list {
+	return `    .clock-warning {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--warning-light);
+      border: 1px solid var(--warning);
+      border-left: 3px solid var(--warning-dark);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      line-height: 1.45;
+    }
+
+    .clock-warning[hidden] {
+      display: none;
+    }
+
+    .clock-warning-message {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .clock-warning-icon {
+      flex: 0 0 auto;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .clock-warning-text {
+      min-width: 0;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .clock-sync-retry-button {
+      min-height: 32px;
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      border: 1px solid var(--warning-dark);
+      border-radius: 4px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .clock-sync-retry-button:hover {
+      background: var(--bg-hover);
+    }
+
+    .clock-sync-retry-button:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    .clock-sync-retry-button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    @media (max-width: 480px) {
+      .clock-warning {
+        padding: 10px;
+        gap: 8px;
+      }
+
+      .clock-warning-message {
+        gap: 7px;
+      }
+
+      .clock-sync-retry-button {
+        min-height: 44px;
+        padding: 8px 10px;
+      }
+    }
+
+    .secrets-list,
+    .service-group-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 10px;
@@ -10,9 +95,66 @@ export function getComponentStyles() {
       margin: 0 auto;
     }
 
+    .secrets-list.is-grouped {
+      display: block;
+    }
+
+    .service-group {
+      min-width: 0;
+    }
+
+    .service-group + .service-group {
+      margin-top: 24px;
+    }
+
+    .service-group-header {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .service-group-header::after {
+      content: '';
+      flex: 1 1 auto;
+      min-width: 18px;
+      border-top: 1px solid var(--border-primary);
+    }
+
+    .service-group-title {
+      min-width: 0;
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .service-group-count {
+      flex: 0 0 auto;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .service-group-grid {
+      min-width: 0;
+    }
+
+    @media (max-width: 480px) {
+      .service-group + .service-group {
+        margin-top: 20px;
+      }
+    }
+
     .secret-card {
       background: var(--card-bg);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       padding: 16px;
       padding-top: 20px;
       border: 1px solid var(--card-border);
@@ -323,6 +465,243 @@ export function getComponentStyles() {
       text-align: right;
     }
 
+    /* TOTP 窗口切换动效：同一组 nextToken 通过流转、翻牌或聚光显现完成交接 */
+    @keyframes otp-promote-current-slide {
+      0%, 38% {
+        opacity: 0;
+        transform: translateX(12px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes otp-promote-next-settle {
+      from {
+        opacity: 0;
+        transform: translateX(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes otp-promote-flip-current {
+      0%, 28% {
+        opacity: 0;
+        transform: perspective(420px) rotateX(88deg);
+      }
+      62% {
+        opacity: 1;
+        transform: perspective(420px) rotateX(-8deg);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(420px) rotateX(0);
+      }
+    }
+
+    @keyframes otp-promote-flip-next {
+      0%, 72% {
+        opacity: 0;
+        transform: none;
+      }
+      100% {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @keyframes otp-promote-spotlight-current {
+      0%, 18% {
+        opacity: 0;
+        transform: scale(0.94);
+        text-shadow: none;
+      }
+      54% {
+        opacity: 1;
+        transform: scale(1.04);
+        text-shadow: 0 0 14px var(--accent-color, #2196F3);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow: none;
+      }
+    }
+
+    @keyframes otp-promote-spotlight-next {
+      0%, 72% {
+        opacity: 0;
+        transform: none;
+      }
+      100% {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @keyframes otp-promote-source-flip {
+      0%, 12% {
+        opacity: 0.95;
+        transform: translate(-50%, -50%) perspective(420px) rotateX(0) scale(1);
+      }
+      48% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) perspective(420px) rotateX(-78deg) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) perspective(420px) rotateX(-90deg) scale(0.98);
+      }
+    }
+
+    @keyframes otp-promote-source-spotlight {
+      0%, 12% {
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(1);
+        text-shadow: none;
+      }
+      30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+        text-shadow: 0 0 10px var(--accent-color, #2196F3);
+      }
+      52% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.02);
+        text-shadow: 0 0 5px var(--accent-color, #2196F3);
+      }
+      72% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.96);
+        text-shadow: none;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.96);
+        text-shadow: none;
+      }
+    }
+
+    @keyframes otp-promote-fly {
+      0% {
+        opacity: 0.78;
+        transform: translate(-50%, -50%) scale(var(--otp-fly-start-scale, 0.5));
+      }
+      68% {
+        opacity: 1;
+        transform: translate(
+          calc(-50% + var(--otp-fly-x, 0px)),
+          calc(-50% + var(--otp-fly-y, 0px))
+        ) scale(1.06);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(
+          calc(-50% + var(--otp-fly-x, 0px)),
+          calc(-50% + var(--otp-fly-y, 0px))
+        ) scale(1);
+      }
+    }
+
+    .otp-promote-current {
+      animation: otp-promote-current-slide 360ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+      transition: none;
+      will-change: transform, opacity;
+    }
+
+    .otp-promote-next {
+      animation: otp-promote-next-settle 180ms ease-out both;
+      transition: none;
+      will-change: transform, opacity;
+    }
+
+    .otp-promote-flip-current {
+      animation: otp-promote-flip-current 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+      transform-origin: center top;
+      backface-visibility: hidden;
+      transition: none;
+      will-change: transform, opacity;
+    }
+
+    .otp-promote-flip-next {
+      animation: otp-promote-flip-next 520ms ease-out both;
+      transition: none;
+      will-change: transform, opacity;
+    }
+
+    .otp-promote-spotlight-current {
+      animation: otp-promote-spotlight-current 460ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+      transform-origin: center;
+      transition: none;
+      will-change: transform, opacity;
+    }
+
+    .otp-promote-spotlight-next {
+      animation: otp-promote-spotlight-next 460ms ease-out both;
+      transition: none;
+      will-change: opacity;
+    }
+
+    .otp-promotion-flyer {
+      position: fixed;
+      display: block;
+      z-index: 1002;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      margin: 0;
+      padding: 0;
+      color: var(--otp-text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'SF Pro Display', monospace;
+      font-size: 42px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      line-height: 1.1;
+      text-align: left;
+      transform-origin: center;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .otp-promotion-flyer-active {
+      animation: otp-promote-fly 360ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    .otp-promotion-flyer-flip {
+      animation: otp-promote-source-flip 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+      backface-visibility: hidden;
+    }
+
+    .otp-promotion-flyer-spotlight {
+      animation: otp-promote-source-spotlight 460ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .otp-promote-current,
+      .otp-promote-next,
+      .otp-promote-flip-current,
+      .otp-promote-flip-next,
+      .otp-promote-spotlight-current,
+      .otp-promote-spotlight-next {
+        animation: none;
+        transform: none;
+        opacity: 1;
+        will-change: auto;
+      }
+
+      .otp-promotion-flyer,
+      .otp-promotion-flyer-active,
+      .otp-promotion-flyer-flip,
+      .otp-promotion-flyer-spotlight {
+        display: none !important;
+        animation: none !important;
+      }
+    }
+
     .progress-mini {
       width: 60px;
       height: 4px;
@@ -339,15 +718,14 @@ export function getComponentStyles() {
     }
 
     .progress-top {
-      width: 100%;
       height: 1px;
-      background: var(--bg-primary);
+      background: transparent;
       border-radius: 0;
       overflow: hidden;
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: -1px;
+      left: var(--radius-lg);
+      right: var(--radius-lg);
     }
 
     .progress-top-fill {
