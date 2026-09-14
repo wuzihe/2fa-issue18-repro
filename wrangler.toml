@@ -3,7 +3,6 @@ main = "src/worker.js"
 compatibility_date = "2024-01-13"
 workers_dev = true
 
-
 # KV 命名空间
 # 始终声明 SECRETS_KV，避免 Git 自动构建部署时丢失绑定。
 # 新版 Wrangler 会在首次部署时自动创建或保持已链接的 KV 资源。
@@ -35,11 +34,9 @@ ENVIRONMENT = "production"
 [env.development]
 name = "2fa-issue18-repro-dev"
 
-
 # 绑定项不可继承，开发环境也需要显式声明。
 [[env.development.kv_namespaces]]
 binding = "SECRETS_KV"
-
 
 [env.development.vars]
 ENVIRONMENT = "development"
